@@ -1,0 +1,82 @@
+diff --git a/kleaf/bazel.WORKSPACE b/kleaf/bazel.WORKSPACE
+index 935befb..e57c65c 100644
+--- a/kleaf/bazel.WORKSPACE
++++ b/kleaf/bazel.WORKSPACE
+@@ -13,13 +13,21 @@
+ # limitations under the License.
+ 
+ toplevel_output_directories(paths = ["out"])
+-
+-local_repository(
++load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
++http_archive(
+     name = "bazel_skylib",
+-    path = "external/bazel-skylib",
++    urls = [
++        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
++        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.1.1/bazel-skylib-1.1.1.tar.gz",
++    ],
++    sha256 = "c6966ec828da198c5d9adbaa94c05e3a1c7f21bd012a0b29ba8ddbccb2c93b0d",
+ )
+ 
+-local_repository(
++http_archive(
+     name = "io_bazel_stardoc",
+-    path = "external/stardoc",
++    sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
++    urls = [
++        "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
++        "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
++    ],
+ )
+diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
+index fd30d4d..7f33b01 100644
+--- a/kleaf/kernel.bzl
++++ b/kleaf/kernel.bzl
+@@ -432,9 +432,6 @@ def _get_tools(toolchain_version):
+         Label(e)
+         for e in (
+             "//build:kernel-build-scripts",
+-            "//prebuilts/build-tools:linux-x86",
+-            "//prebuilts/kernel-build-tools:linux-x86",
+-            "//prebuilts/clang/host/linux-x86/clang-%s:binaries" % toolchain_version,
+         )
+     ]
+ 
+@@ -502,6 +499,7 @@ def _kernel_config_impl(ctx):
+             "Makefile",
+             "configs/",
+             "scripts/",
++            "include/",
+         ]])
+     ]
+ 
+@@ -553,7 +551,8 @@ def _kernel_config_impl(ctx):
+         {lto_command}
+         # Grab outputs
+           mv ${{OUT_DIR}}/.config {config}
+-          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
++          # TODO: make this path configurable
++          tar czf {include_tar_gz} -C external/linux include/
+         """.format(
+         config = config.path,
+         include_tar_gz = include_tar_gz.path,
+diff --git a/kleaf/preserve_env.sh b/kleaf/preserve_env.sh
+index 4eb3c82..5889bb7 100755
+--- a/kleaf/preserve_env.sh
++++ b/kleaf/preserve_env.sh
+@@ -1,4 +1,4 @@
+-#!/bin/bash
++#!/usr/bin/env bash
+ 
+ # Copyright (C) 2021 The Android Open Source Project
+ #
+@@ -21,7 +21,7 @@
+ # Hence, drop the actual value of $PWD and keep the references to it dynamic.
+ #
+ 
+-sed=/bin/sed
++sed="$(readlink -f $(which sed))"
+ 
+ ( export -p; export -f ) | \
+   # Remove the reference to PWD itself

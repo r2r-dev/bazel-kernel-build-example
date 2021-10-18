@@ -1,0 +1,21 @@
+load("@kleaf//build/kleaf:kernel.bzl", "kernel_build")
+
+kernel_build(
+    name = "kernel_x86_64",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "android/*",
+            "BUILD.bazel",
+            "**/*.bzl",
+            ".git/**",
+        ],
+    ),
+    outs = [
+        "System.map",
+        "arch/x86/boot/bzImage",
+        "modules.builtin",
+        "vmlinux",
+    ],
+    build_config = ":build.config.x86_64",
+)

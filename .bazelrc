@@ -1,0 +1,19 @@
+build --incompatible_enable_cc_toolchain_resolution
+build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host
+build --platforms @io_tweag_rules_nixpkgs//nixpkgs/platforms:host
+
+# Enable toplevel_output_directories and Ninja executor in Bazel
+common --experimental_ninja_actions
+
+# Lock down the PATH variable in actions to /usr/bin and /usr/local/bin.
+#build --experimental_strict_action_env
+
+# Show the full set of flags for observability and debuggability.
+common --announce_rc
+
+# Pass through any SOURCE_DATE_EPOCH set from outside
+build --action_env=SOURCE_DATE_EPOCH
+
+# flag aliases for build settings
+build --flag_alias=lto=@iok//build/kleaf:lto
+

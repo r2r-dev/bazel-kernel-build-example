@@ -1,0 +1,6 @@
+exports_files([
+    "bazel.nix",
+    "nixpkgs.nix",
+    "01.kleaf.patch",
+    "02.kernel.patch",
+])

@@ -1,0 +1,61 @@
+diff --git a/scripts/selinux/genheaders/genheaders.c b/scripts/selinux/genheaders/genheaders.c
+index fa48fabcb..3cc4893d9 100644
+--- a/scripts/selinux/genheaders/genheaders.c
++++ b/scripts/selinux/genheaders/genheaders.c
+@@ -9,7 +9,6 @@
+ #include <string.h>
+ #include <errno.h>
+ #include <ctype.h>
+-#include <sys/socket.h>
+ 
+ struct security_class_mapping {
+ 	const char *name;
+diff --git a/scripts/selinux/mdp/mdp.c b/scripts/selinux/mdp/mdp.c
+index ffe8179f5..c29fa4a62 100644
+--- a/scripts/selinux/mdp/mdp.c
++++ b/scripts/selinux/mdp/mdp.c
+@@ -32,7 +32,6 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ #include <string.h>
+-#include <sys/socket.h>
+ 
+ static void usage(char *name)
+ {
+diff --git a/security/selinux/include/classmap.h b/security/selinux/include/classmap.h
+index acdee7795..5ae315ab0 100644
+--- a/security/selinux/include/classmap.h
++++ b/security/selinux/include/classmap.h
+@@ -1,5 +1,6 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
+ #include <linux/capability.h>
++#include <linux/socket.h>
+ 
+ #define COMMON_FILE_SOCK_PERMS "ioctl", "read", "write", "create", \
+     "getattr", "setattr", "lock", "relabelfrom", "relabelto", "append", "map"
+diff --git a/tools/build/Build.include b/tools/build/Build.include
+index 418871d02..69d058a6d 100644
+--- a/tools/build/Build.include
++++ b/tools/build/Build.include
+@@ -62,8 +62,6 @@ dep-cmd = $(if $(wildcard $(fixdep)),
+            $(fixdep) $(depfile) $@ '$(make-cmd)' > $(dot-target).tmp;           \
+            rm -f $(depfile);                                                    \
+            mv -f $(dot-target).tmp $(dot-target).cmd,                           \
+-           printf '\# cannot find fixdep (%s)\n' $(fixdep) > $(dot-target).cmd; \
+-           printf '\# using basic dep data\n\n' >> $(dot-target).cmd;           \
+            cat $(depfile) >> $(dot-target).cmd;                                 \
+            printf '\n%s\n' 'cmd_$@ := $(make-cmd)' >> $(dot-target).cmd)
+ 
+diff --git a/tools/objtool/Makefile b/tools/objtool/Makefile
+index e6acc281d..e0385b357 100644
+--- a/tools/objtool/Makefile
++++ b/tools/objtool/Makefile
+@@ -35,7 +35,7 @@ CFLAGS   += -Wall -Werror $(WARNINGS) -fomit-frame-pointer -O2 -g $(INCLUDES)
+ LDFLAGS  += -lelf $(LIBSUBCMD)
+ 
+ # Allow old libelf to be used:
+-elfshdr := $(shell echo '\#include <libelf.h>' | $(CC) $(CFLAGS) -x c -E - | grep elf_getshdr)
++elfshdr := $(shell echo '#include <libelf.h>' | $(CC) $(CFLAGS) -x c -E - | grep elf_getshdr)
+ CFLAGS += $(if $(elfshdr),,-DLIBELF_USE_DEPRECATED)
+ 
+ AWK = awk

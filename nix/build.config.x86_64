@@ -1,0 +1,28 @@
+ARCH=x86_64
+
+LLVM_IAS=0
+SKIP_MRPROPER=1
+LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN=prebuilts/gas/linux-x86
+
+#TODO: generate CPATH and LD_LIBRARY_PATH
+CPATH="/nix/store/hm94hdjk239fqicmygl3a48zqqqil14j-openssl-1.0.2p-dev/include:/nix/store/k8msgj41dknglyg2i0yiiw29h291cijk-libelf-0.8.13/include"
+LIBRARY_PATH="/nix/store/9kr8r78bwk12050ppywfbhg1vrsd6dp8-openssl-1.0.2p/lib:/nix/store/k8msgj41dknglyg2i0yiiw29h291cijk-libelf-0.8.13/lib"
+
+#SHELL='sh -x'
+#MAKEFLAGS="V=1"
+
+DEFCONFIG=defconfig
+
+MAKE_GOALS="
+bzImage
+modules
+"
+
+FILES="
+arch/x86/boot/bzImage
+vmlinux
+System.map
+vmlinux.symvers
+modules.builtin
+modules.builtin.modinfo
+"
