@@ -73,8 +73,8 @@ index fd30d4d..8698c02 100644
          # Grab outputs
 -          mv ${{OUT_DIR}}/.config {config}
 -          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
-+        mv ${{OUT_DIR}}/.config {config}
-+        tar czf {include_tar_gz} -C ${{KERNEL_DIR}} include/
++          mv ${{OUT_DIR}}/.config {config}
++          tar czf {include_tar_gz} -C ${{KERNEL_DIR}} include/
          """.format(
          config = config.path,
          include_tar_gz = include_tar_gz.path,
