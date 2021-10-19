@@ -12,6 +12,7 @@ let
       bc
       binutils
       coreutils
+      dateutils
       diffutils
       findutils
       gawk

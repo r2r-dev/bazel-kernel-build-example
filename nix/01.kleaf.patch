@@ -46,9 +46,18 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..8698c02 100644
+index fd30d4d..9336e6d 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
+@@ -24,7 +24,7 @@ _kernel_build_implicit_outs = [
+ 
+ def _debug_trap():
+     return """set -x
+-              trap '>&2 /bin/date' DEBUG"""
++              trap '>&2 date' DEBUG"""
+ 
+ def _debug_print_scripts(ctx, command):
+     if ctx.attr._debug_print_scripts[BuildSettingInfo].value:
 @@ -432,9 +432,6 @@ def _get_tools(toolchain_version):
          Label(e)
          for e in (
@@ -67,13 +76,11 @@ index fd30d4d..8698c02 100644
          ]])
      ]
  
-@@ -552,8 +550,8 @@ def _kernel_config_impl(ctx):
-         # LTO configuration
+@@ -553,7 +551,7 @@ def _kernel_config_impl(ctx):
          {lto_command}
          # Grab outputs
--          mv ${{OUT_DIR}}/.config {config}
+           mv ${{OUT_DIR}}/.config {config}
 -          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
-+          mv ${{OUT_DIR}}/.config {config}
 +          tar czf {include_tar_gz} -C ${{KERNEL_DIR}} include/
          """.format(
          config = config.path,
