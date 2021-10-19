@@ -6,7 +6,8 @@ build --platforms @io_tweag_rules_nixpkgs//nixpkgs/platforms:host
 common --experimental_ninja_actions
 
 # Lock down the PATH variable in actions to /usr/bin and /usr/local/bin.
-#build --experimental_strict_action_env
+build --incompatible_strict_action_env
+build --experimental_strict_action_env
 
 # Show the full set of flags for observability and debuggability.
 common --announce_rc

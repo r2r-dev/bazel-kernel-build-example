@@ -1,10 +1,3 @@
-
-#PATH=/nix/store/n2dprmax869lb76gwpc2ygaqwbdgq7r0-gnutar-1.34/bin:/nix/store/vaal5xhgdn20qgjj58p9kdnqam8ppn6y-perl-5.32.1/bin:/nix/store/lglxa6zjxag1dy0d0lygb34jwv1s65g6-coreutils-8.32/bin:/nix/store/wv35g5lff84rray15zlzarcqi9fxzz84-bash-4.4-p23/bin:/nix/store/z3pg7gk6bxlgr5kjxfkac7y61ywqc026-gnused-4.8/bin:/nix/store/szmvfjc01v3hchkf7in294w5jk8zrlm0-toybox-0.8.4/bin:/nix/store/wfzdk9vxayfnw7fqy05s7mmypg5a8lyr-gnumake-4.3/bin:/nix/store/p6n1vjz38lvikcfn80gyzqrdwnhkp069-gcc-wrapper-6.5.0/bin:/nix/store/hm66rnx7pm0czliwa42nhnk8vfwwn774-gzip-1.10/bin:/nix/store/4xkhd51k7y6g9vi2h9kfvcxd67k3v3f1-gawk-5.1.0/bin:/nix/store/5ddb4j8z84p6sjphr0kh6cbq5jd12ncs-binutils-2.35.1/bin:/nix/store/qwn0a4chj0bn457fi5dmmxzd5r5h1nk7-bc-1.07.1/bin:/nix/store/vhnb9dk5py14by8rfrb45a0pi1cy4lk9-python3-3.7.6/bin
-
-CPATH="/nix/store/hm94hdjk239fqicmygl3a48zqqqil14j-openssl-1.0.2p-dev/include:/nix/store/k8msgj41dknglyg2i0yiiw29h291cijk-libelf-0.8.13/include"
-LIBRARY_PATH="/nix/store/9kr8r78bwk12050ppywfbhg1vrsd6dp8-openssl-1.0.2p/lib:/nix/store/k8msgj41dknglyg2i0yiiw29h291cijk-libelf-0.8.13/lib"
-
-
 ARCH=x86_64
 LLVM_IAS=0
 SKIP_MRPROPER=1
