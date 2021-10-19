@@ -15,6 +15,7 @@ let
   kernel_x86_64_env = pkgs.buildEnv {
     name = "kernel_x86_64_env";
     paths = with pkgs; [
+      diffutils.out
       glibc.bin
       gnutar
       gnugrep
@@ -30,15 +31,15 @@ let
       gzip
       bc
       python37
-      
+
       oldpkgs.openssl.dev
-      oldpkgs.openssl.out 
-      pkgs.libelf.out 
+      oldpkgs.openssl.out
+      pkgs.libelf.out
     ];
     pathsToLink = [ "/bin" "/include" "/lib" ];
     ignoreCollisions = true;
   };
-  build = pkgs.writeTextFile { 
+  build = pkgs.writeTextFile {
     name = "build.config.x86_64";
     text = ''
       KERNEL_DIR=external/linux
@@ -72,4 +73,4 @@ in pkgs.stdenv.mkDerivation {
     mkdir $out
     ln -s ${build} $out/build.config.x86_64
   '';
-} 
+}
