@@ -46,10 +46,26 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..bf3bf63 100644
+index fd30d4d..063b63f 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
-@@ -432,9 +432,6 @@ def _get_tools(toolchain_version):
+@@ -109,6 +109,7 @@ def kernel_build(
+         module_outs = [],
+         generate_vmlinux_btf = False,
+         deps = (),
++        workspace_name = "linux",
+         toolchain_version = _KERNEL_BUILD_DEFAULT_TOOLCHAIN_VERSION):
+     """Defines a kernel build target with all dependent targets.
+ 
+@@ -267,6 +268,7 @@ def kernel_build(
+         srcs = [sources_target_name],
+         config = config_target_name + "/.config",
+         include_tar_gz = config_target_name + "/include.tar.gz",
++        workspace_name = workspace_name,
+     )
+ 
+     _modules_prepare(
+@@ -432,9 +434,6 @@ def _get_tools(toolchain_version):
          Label(e)
          for e in (
              "//build:kernel-build-scripts",
@@ -59,7 +75,7 @@ index fd30d4d..bf3bf63 100644
          )
      ]
  
-@@ -502,6 +499,7 @@ def _kernel_config_impl(ctx):
+@@ -502,6 +501,7 @@ def _kernel_config_impl(ctx):
              "Makefile",
              "configs/",
              "scripts/",
@@ -67,16 +83,40 @@ index fd30d4d..bf3bf63 100644
          ]])
      ]
  
-@@ -553,7 +551,8 @@ def _kernel_config_impl(ctx):
+@@ -509,6 +509,7 @@ def _kernel_config_impl(ctx):
+     include_tar_gz = ctx.outputs.include_tar_gz
+ 
+     lto_config_flag = ctx.attr.lto[BuildSettingInfo].value
++    workspace_name = ctx.attr.workspace_name
+ 
+     lto_command = ""
+     if lto_config_flag != "default":
+@@ -553,11 +554,16 @@ def _kernel_config_impl(ctx):
          {lto_command}
          # Grab outputs
            mv ${{OUT_DIR}}/.config {config}
 -          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
-+          # TODO: make this path configurable
-+          tar czf {include_tar_gz} -C external/linux include/
++          if [[ -d src ]]; then
++            tar czf {include_tar_gz} -C src include/
++          else
++            tar czf {include_tar_gz} -C external/{workspace_name} include/
++          fi
          """.format(
          config = config.path,
          include_tar_gz = include_tar_gz.path,
+         lto_command = lto_command,
++        workspace_name = workspace_name,
+     )
+ 
+     _debug_print_scripts(ctx, command)
+@@ -601,6 +607,7 @@ _kernel_config = rule(
+             doc = "the packaged include/ files",
+         ),
+         "lto": attr.label(default = "//build/kleaf:lto"),
++        "workspace_name": attr.string(default = "linux"),
+         "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
+     },
+ )
 diff --git a/kleaf/preserve_env.sh b/kleaf/preserve_env.sh
 index 4eb3c82..5889bb7 100755
 --- a/kleaf/preserve_env.sh
