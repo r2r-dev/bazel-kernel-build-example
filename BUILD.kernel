@@ -1,5 +1,5 @@
-load("@kleaf//build/kleaf:kernel.bzl", "kernel_build")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@kleaf//build/kleaf:kernel.bzl", "kernel_build")
 
 copy_file(
     name = "build.config",
