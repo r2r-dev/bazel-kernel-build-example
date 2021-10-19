@@ -5,13 +5,6 @@
 } }:
 
 let
-  oldpkgs = import (builtins.fetchTarball {
-    name = "nixos-unstable-2018-09-12";
-    url =
-      "https://github.com/nixos/nixpkgs/archive/ca2ba44cab47767c8127d1c8633e2b581644eb8f.tar.gz";
-    sha256 = "1jg7g6cfpw8qvma0y19kwyp549k1qyf11a5sg6hvn6awvmkny47v";
-  }) { system = "x86_64-linux"; };
-
   kernel_x86_64_env = pkgs.buildEnv {
     name = "kernel_x86_64_env";
     paths = with pkgs; [
@@ -34,8 +27,8 @@ let
       python37
 
       libelf
-      oldpkgs.openssl.dev
-      oldpkgs.openssl.out
+      openssl.dev
+      openssl.out
     ];
     pathsToLink = [ "/bin" "/include" "/lib" ];
     ignoreCollisions = true;
