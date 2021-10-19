@@ -1,4 +1,2 @@
 .bazel-*
-3rdparty
-src
 bazel-*
