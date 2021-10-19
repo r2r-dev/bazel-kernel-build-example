@@ -9,18 +9,8 @@ let
         "https://android.googlesource.com/platform/build/bazel_common_rules";
       rev = "3b65aae27e728cb48560a6e76b8351c93c10d794";
     };
-    phases = [ "unpackPhase" "installPhase" ];
-    installPhase = ''
-      mkdir -p $out
-      cp -R $src/* $out/ 
-    '';
+    phases = [ "unpackPhase" ];
   };
-  oldpkgs = import (builtins.fetchTarball {
-    name = "nixos-unstable-2018-09-12";
-    url =
-      "https://github.com/nixos/nixpkgs/archive/ca2ba44cab47767c8127d1c8633e2b581644eb8f.tar.gz";
-    sha256 = "1jg7g6cfpw8qvma0y19kwyp549k1qyf11a5sg6hvn6awvmkny47v";
-  }) { system = "x86_64-linux"; };
 
 in {
 
@@ -52,12 +42,6 @@ in {
     installPhase = ''
       mkdir -p $out
       cp -R ./* $out/ 
-      echo PATH=${pkgs.glibc.bin}/bin:${pkgs.gnutar}/bin:${pkgs.gawk}/bin:${pkgs.perl}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.gnused}/bin:${pkgs.toybox}/bin:${pkgs.gnumake}/bin:${pkgs.gcc6}/bin:${pkgs.gzip}/bin:${pkgs.binutils-unwrapped}/bin:${pkgs.bc}/bin:${pkgs.python37}/bin >> $out/build.config.x86_64
-
-      echo CPATH=${oldpkgs.openssl.dev}/include:${pkgs.libelf.out}/include >> $out/build.config.x86_64
-      echo LIBRARY_PATH=${oldpkgs.openssl.out}/lib:${pkgs.libelf.out}/lib >> $out/build.config.x86_64
-
-      cat ${./build.config.x86_64} >> $out/build.config.x86_64
     '';
   };
 

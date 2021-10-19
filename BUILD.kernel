@@ -1,4 +1,11 @@
 load("@kleaf//build/kleaf:kernel.bzl", "kernel_build")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+
+copy_file(
+    name = "build.config",
+    src = "@kernel_toolchain_x86_64//:build.config.x86_64",
+    out = "build.config.x86_64",
+)
 
 kernel_build(
     name = "kernel_x86_64",
@@ -10,13 +17,12 @@ kernel_build(
             "**/*.bzl",
             ".git/**",
         ],
-    ),
+    ) + ["build.config.x86_64"],
     outs = [
         "System.map",
         "arch/x86/boot/bzImage",
         "modules.builtin",
         "vmlinux",
     ],
-    build_config = ":build.config.x86_64",
-    workspace_name = "linux",
+    build_config = "build.config.x86_64",
 )
