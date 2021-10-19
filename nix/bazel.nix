@@ -1,6 +1,5 @@
 { system ? builtins.currentSystem
-, pkgs ? import ./nixpkgs.nix { inherit system; }
-}:
+, pkgs ? import ./nixpkgs.nix { inherit system; } }:
 let
 
   aplatform = pkgs.stdenv.mkDerivation {
@@ -47,7 +46,8 @@ in {
     installPhase = ''
       mkdir -p $out
       cp -R ./* $out/ 
-      cat ${./build.config.x86_64} > $out/build.config.x86_64
+      echo PATH=${pkgs.glibc.bin}/bin:${pkgs.gnutar}/bin:${pkgs.gawk}/bin:${pkgs.perl}/bin:${pkgs.coreutils}/bin:${pkgs.bash}/bin:${pkgs.gnused}/bin:${pkgs.busybox}/bin:${pkgs.gnumake}/bin:${pkgs.gcc6}/bin:${pkgs.gzip}/bin:${pkgs.binutils-unwrapped}/bin:${pkgs.bc}/bin:${pkgs.python37}/bin >> $out/build.config.x86_64
+      cat ${./build.config.x86_64} >> $out/build.config.x86_64
     '';
   };
 

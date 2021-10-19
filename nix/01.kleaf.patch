@@ -1,3 +1,19 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index be9a376..a8b9ff2 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -18,11 +18,7 @@ package(default_visibility = ["//visibility:public"])
+ genrule(
+     name = "host-tools",
+     outs = [
+-        "host-tools/bash",
+-        "host-tools/perl",
+-        "host-tools/rsync",
+         "host-tools/sh",
+-        "host-tools/tar",
+     ],
+     cmd = "for i in $(OUTS); do ln -s $$(which $$(basename $$i)) $$i; done",
+     tags = ["no-remote"],
 diff --git a/kleaf/bazel.WORKSPACE b/kleaf/bazel.WORKSPACE
 index 935befb..e57c65c 100644
 --- a/kleaf/bazel.WORKSPACE
@@ -30,7 +46,7 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..7f33b01 100644
+index fd30d4d..bf3bf63 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
 @@ -432,9 +432,6 @@ def _get_tools(toolchain_version):

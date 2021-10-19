@@ -32,38 +32,19 @@
         }) { system = "x86_64-linux"; };
       in pkgs.mkShell {
         buildInputs = with pkgs; [
-          rsync
-          perl
-          flex
-          bison
-          libelf
-          oldpkgs.openssl.dev
-          oldpkgs.openssl
-          bc
-
           git
           cacert
           coreutils-full
           toybox
           curlFull
-          gnutar
-          gnused
-          gawk
-          # For Bazel rules
+
           nixFlakes
           bazel
-          bazel-buildtools
         ];
         shellHook = ''
           # patch binary from toybox breaks some of bazel repository rules when running `bazel sync`
           # override path to force use of gnupatch instead
-          export PATH="$${pkgs.gawk}/bin:{pkgs.gnupatch}/bin:${pkgs.gnutar}/bin:${pkgs.gnused}/bin:${pkgs.gcc6}/bin:''${PATH}"
-          export WORKSPACE_ROOT="`pwd`"
-
-          # Store debug output in a separate directory
-          BAZEL_DEBUG="''${WORKSPACE_ROOT}/bazel-debug"
-          if [ ! -d "''${BAZEL_DEBUG}" ]; then mkdir -p "''${BAZEL_DEBUG}"; fi
-
+          export PATH="${pkgs.gnupatch}/bin:''${PATH}"
           source ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh
         '';
       });
