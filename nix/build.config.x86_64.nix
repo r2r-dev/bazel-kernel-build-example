@@ -15,26 +15,27 @@ let
   kernel_x86_64_env = pkgs.buildEnv {
     name = "kernel_x86_64_env";
     paths = with pkgs; [
-      diffutils.out
-      glibc.bin
-      gnutar
-      gnugrep
-      gawk
-      perl
-      coreutils
-      binutils
       bash
-      gnused
-      which
-      gnumake
-      gcc6
-      gzip
       bc
+      binutils
+      coreutils
+      diffutils
+      findutils
+      gawk
+      gcc6
+      glibc.bin
+      gnugrep
+      gnumake
+      gnused
+      gnutar
+      gzip
+      perl
+      which
       python37
 
+      libelf
       oldpkgs.openssl.dev
       oldpkgs.openssl.out
-      pkgs.libelf.out
     ];
     pathsToLink = [ "/bin" "/include" "/lib" ];
     ignoreCollisions = true;
