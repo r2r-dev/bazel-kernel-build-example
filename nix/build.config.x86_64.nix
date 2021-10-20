@@ -37,7 +37,6 @@ let
   build = pkgs.writeTextFile {
     name = "build.config.x86_64";
     text = ''
-      KERNEL_DIR=external/linux
       PATH=${kernel_x86_64_env}/bin
       CPATH=${kernel_x86_64_env}/include
       LIBRARY_PATH=${kernel_x86_64_env}/lib

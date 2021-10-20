@@ -46,7 +46,7 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..9336e6d 100644
+index fd30d4d..ff90cd6 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
 @@ -24,7 +24,7 @@ _kernel_build_implicit_outs = [
@@ -58,7 +58,43 @@ index fd30d4d..9336e6d 100644
  
  def _debug_print_scripts(ctx, command):
      if ctx.attr._debug_print_scripts[BuildSettingInfo].value:
-@@ -432,9 +432,6 @@ def _get_tools(toolchain_version):
+@@ -109,6 +109,7 @@ def kernel_build(
+         module_outs = [],
+         generate_vmlinux_btf = False,
+         deps = (),
++        kernel_dir = "",
+         toolchain_version = _KERNEL_BUILD_DEFAULT_TOOLCHAIN_VERSION):
+     """Defines a kernel build target with all dependent targets.
+ 
+@@ -259,6 +260,7 @@ def kernel_build(
+         build_config = build_config,
+         srcs = build_config_srcs,
+         toolchain_version = toolchain_version,
++        kernel_dir = kernel_dir,
+     )
+ 
+     _kernel_config(
+@@ -372,6 +374,9 @@ def _kernel_env_impl(ctx):
+           export MAKEFLAGS="${{MAKEFLAGS}} -j$(nproc)"
+         # create a build environment
+           export BUILD_CONFIG={build_config}
++          if [[ "{kernel_dir}" != "" ]]; then
++            export KERNEL_DIR="{kernel_dir}"
++          fi
+           source {setup_env}
+         # capture it as a file to be sourced in downstream rules
+           {preserve_env} > {out}
+@@ -380,8 +385,8 @@ def _kernel_env_impl(ctx):
+         setup_env = setup_env.path,
+         preserve_env = preserve_env.path,
+         out = out_file.path,
++        kernel_dir = ctx.attr.kernel_dir,
+     )
+-
+     _debug_print_scripts(ctx, command)
+     ctx.actions.run_shell(
+         inputs = ctx.files.srcs + [
+@@ -432,9 +437,6 @@ def _get_tools(toolchain_version):
          Label(e)
          for e in (
              "//build:kernel-build-scripts",
@@ -68,7 +104,18 @@ index fd30d4d..9336e6d 100644
          )
      ]
  
-@@ -502,6 +499,7 @@ def _kernel_config_impl(ctx):
+@@ -479,6 +481,10 @@ _kernel_env = rule(
+         "toolchain_version": attr.string(
+             doc = "the toolchain to use for this environment",
+         ),
++        "kernel_dir": attr.string(
++            default = "",
++            doc = "kernel source directory. mandatory if kernel is an external repository",
++        ),
+         "_tools": attr.label_list(default = _get_tools),
+         "_host_tools": attr.label(default = "//build:host-tools"),
+         "_build_utils_sh": attr.label(
+@@ -502,6 +508,7 @@ def _kernel_config_impl(ctx):
              "Makefile",
              "configs/",
              "scripts/",
@@ -76,7 +123,7 @@ index fd30d4d..9336e6d 100644
          ]])
      ]
  
-@@ -553,7 +551,7 @@ def _kernel_config_impl(ctx):
+@@ -553,7 +560,7 @@ def _kernel_config_impl(ctx):
          {lto_command}
          # Grab outputs
            mv ${{OUT_DIR}}/.config {config}
