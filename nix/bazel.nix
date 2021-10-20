@@ -30,19 +30,4 @@ in {
     '';
   };
 
-  linux = pkgs.stdenv.mkDerivation {
-    name = "linux";
-    src = builtins.fetchurl {
-      url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.18.tar.gz";
-      sha256 =
-        "ca13fa5c6e3a6b434556530d92bc1fc86532c2f4f5ae0ed766f6b709322d6495";
-    };
-    phases = [ "unpackPhase" "patchPhase" "installPhase" ];
-    patches = [ ./02.kernel.patch ];
-    installPhase = ''
-      mkdir -p $out
-      cp -R ./* $out/ 
-    '';
-  };
-
 }

@@ -9,7 +9,7 @@ copy_file(
 
 copy_file(
     name = "kernel.config",
-    src = "@kernel-build-example//:config",
+    src = "@kernel-build-example//3rdparty:config",
     out = ".config",
 )
 

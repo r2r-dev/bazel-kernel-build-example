@@ -115,16 +115,12 @@ nixpkgs_package(
     repositories = NIX_REPOS,
 )
 
-nixpkgs_package(
+http_archive(
     name = "linux",
-    attribute_path = "linux",
-    build_file = "//:BUILD.kernel",
-    nix_file = "//nix:bazel.nix",
-    nix_file_deps = [
-        "//:flake.lock",
-        "//nix:bazel.nix",
-        "//nix:nixpkgs.nix",
-        "//nix:02.kernel.patch",
-    ],
-    repositories = NIX_REPOS,
+    strip_prefix = "linux-4.15.18",
+    patch_args = ["-p1"],
+    url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.15.18.tar.gz",
+    sha256 = "ca13fa5c6e3a6b434556530d92bc1fc86532c2f4f5ae0ed766f6b709322d6495",
+    patches = ["//3rdparty:01.kernel.patch"],
+    build_file = "//3rdparty:BUILD.kernel",
 )
