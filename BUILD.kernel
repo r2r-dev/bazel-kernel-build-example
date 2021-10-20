@@ -7,6 +7,12 @@ copy_file(
     out = "build.config.x86_64",
 )
 
+copy_file(
+    name = "kernel.config",
+    src = "@kernel-build-example//:config",
+    out = ".config",
+)
+
 kernel_build(
     name = "kernel_x86_64",
     srcs = glob(
@@ -17,7 +23,7 @@ kernel_build(
             "**/*.bzl",
             ".git/**",
         ],
-    ) + ["build.config.x86_64"],
+    ) + ["build.config.x86_64", ".config"],
     outs = [
         "System.map",
         "arch/x86/boot/bzImage",
@@ -26,4 +32,6 @@ kernel_build(
     ],
     build_config = "build.config.x86_64",
     kernel_dir = "external/linux",
+    skip_defconfig = True,
+    kernel_config = ":kernel.config",
 )

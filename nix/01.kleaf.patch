@@ -46,7 +46,7 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..ff90cd6 100644
+index fd30d4d..e28ece3 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
 @@ -24,7 +24,7 @@ _kernel_build_implicit_outs = [
@@ -58,15 +58,17 @@ index fd30d4d..ff90cd6 100644
  
  def _debug_print_scripts(ctx, command):
      if ctx.attr._debug_print_scripts[BuildSettingInfo].value:
-@@ -109,6 +109,7 @@ def kernel_build(
+@@ -109,6 +109,9 @@ def kernel_build(
          module_outs = [],
          generate_vmlinux_btf = False,
          deps = (),
 +        kernel_dir = "",
++        kernel_config = "",
++        skip_defconfig = False,
          toolchain_version = _KERNEL_BUILD_DEFAULT_TOOLCHAIN_VERSION):
      """Defines a kernel build target with all dependent targets.
  
-@@ -259,6 +260,7 @@ def kernel_build(
+@@ -259,6 +262,7 @@ def kernel_build(
          build_config = build_config,
          srcs = build_config_srcs,
          toolchain_version = toolchain_version,
@@ -74,7 +76,16 @@ index fd30d4d..ff90cd6 100644
      )
  
      _kernel_config(
-@@ -372,6 +374,9 @@ def _kernel_env_impl(ctx):
+@@ -267,6 +271,8 @@ def kernel_build(
+         srcs = [sources_target_name],
+         config = config_target_name + "/.config",
+         include_tar_gz = config_target_name + "/include.tar.gz",
++        skip_defconfig = skip_defconfig,
++        kernel_config = kernel_config,
+     )
+ 
+     _modules_prepare(
+@@ -372,6 +378,9 @@ def _kernel_env_impl(ctx):
            export MAKEFLAGS="${{MAKEFLAGS}} -j$(nproc)"
          # create a build environment
            export BUILD_CONFIG={build_config}
@@ -84,7 +95,7 @@ index fd30d4d..ff90cd6 100644
            source {setup_env}
          # capture it as a file to be sourced in downstream rules
            {preserve_env} > {out}
-@@ -380,8 +385,8 @@ def _kernel_env_impl(ctx):
+@@ -380,8 +389,8 @@ def _kernel_env_impl(ctx):
          setup_env = setup_env.path,
          preserve_env = preserve_env.path,
          out = out_file.path,
@@ -94,7 +105,7 @@ index fd30d4d..ff90cd6 100644
      _debug_print_scripts(ctx, command)
      ctx.actions.run_shell(
          inputs = ctx.files.srcs + [
-@@ -432,9 +437,6 @@ def _get_tools(toolchain_version):
+@@ -432,9 +441,6 @@ def _get_tools(toolchain_version):
          Label(e)
          for e in (
              "//build:kernel-build-scripts",
@@ -104,7 +115,7 @@ index fd30d4d..ff90cd6 100644
          )
      ]
  
-@@ -479,6 +481,10 @@ _kernel_env = rule(
+@@ -479,6 +485,10 @@ _kernel_env = rule(
          "toolchain_version": attr.string(
              doc = "the toolchain to use for this environment",
          ),
@@ -115,23 +126,57 @@ index fd30d4d..ff90cd6 100644
          "_tools": attr.label_list(default = _get_tools),
          "_host_tools": attr.label(default = "//build:host-tools"),
          "_build_utils_sh": attr.label(
-@@ -502,6 +508,7 @@ def _kernel_config_impl(ctx):
+@@ -502,9 +512,16 @@ def _kernel_config_impl(ctx):
              "Makefile",
              "configs/",
              "scripts/",
 +            "include/",
++            ".config",
          ]])
      ]
  
-@@ -553,7 +560,7 @@ def _kernel_config_impl(ctx):
++    if ctx.attr.skip_defconfig:
++       kernel_config_path = ctx.file.kernel_config.path
++    else:
++       kernel_config_path = ""
++
+     config = ctx.outputs.config
+     include_tar_gz = ctx.outputs.include_tar_gz
+ 
+@@ -546,15 +563,20 @@ def _kernel_config_impl(ctx):
+         # Pre-defconfig commands
+           eval ${{PRE_DEFCONFIG_CMDS}}
+         # Actual defconfig
+-          make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
++          if [[ "{skip_defconfig}" != "" ]]; then
++            make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
++            cp "{kernel_config}" ${{OUT_DIR}}/.config
++          fi
+         # Post-defconfig commands
+           eval ${{POST_DEFCONFIG_CMDS}}
+         # LTO configuration
          {lto_command}
          # Grab outputs
            mv ${{OUT_DIR}}/.config {config}
 -          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
 +          tar czf {include_tar_gz} -C ${{KERNEL_DIR}} include/
          """.format(
++        skip_defconfig = ctx.attr.skip_defconfig,
++        kernel_config = kernel_config_path,
          config = config.path,
          include_tar_gz = include_tar_gz.path,
+         lto_command = lto_command,
+@@ -601,6 +623,10 @@ _kernel_config = rule(
+             doc = "the packaged include/ files",
+         ),
+         "lto": attr.label(default = "//build/kleaf:lto"),
++        "skip_defconfig": attr.bool(default = False),
++        "kernel_config": attr.label(
++            allow_single_file = True,
++        ),
+         "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
+     },
+ )
 diff --git a/kleaf/preserve_env.sh b/kleaf/preserve_env.sh
 index 4eb3c82..5889bb7 100755
 --- a/kleaf/preserve_env.sh
