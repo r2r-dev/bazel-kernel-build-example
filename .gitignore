@@ -1,2 +1,4 @@
 .bazel-*
 bazel-*
+.envrc
+.direnv
