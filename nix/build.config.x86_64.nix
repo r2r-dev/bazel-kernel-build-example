@@ -28,6 +28,7 @@ let
       python37
 
       libelf
+      openssl
       openssl.dev
       openssl.out
     ];
