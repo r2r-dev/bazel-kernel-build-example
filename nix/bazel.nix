@@ -1,5 +1,6 @@
 { system ? builtins.currentSystem
-, pkgs ? import ./nixpkgs.nix { inherit system; } }:
+, pkgs ? import ./nixpkgs.nix { inherit system; }
+}:
 let
 
   aplatform = pkgs.stdenv.mkDerivation {
@@ -12,7 +13,8 @@ let
     phases = [ "unpackPhase" ];
   };
 
-in {
+in
+{
 
   kleaf = pkgs.stdenv.mkDerivation {
     name = "kleaf";

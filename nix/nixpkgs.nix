@@ -13,4 +13,5 @@ let
     config.allowUnfree = true;
     overlays = [ ];
   };
-in nixpkgs
+in
+nixpkgs

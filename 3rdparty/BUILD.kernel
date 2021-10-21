@@ -2,6 +2,7 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@kleaf//build/kleaf:kernel.bzl", "kernel_build")
 
 package(default_visibility = ["//visibility:public"])
+
 copy_file(
     name = "build.config",
     src = "@kernel_toolchain_x86_64//:build.config.x86_64",
@@ -24,7 +25,10 @@ kernel_build(
             "**/*.bzl",
             ".git/**",
         ],
-    ) + ["build.config.x86_64", ".config"],
+    ) + [
+        "build.config.x86_64",
+        ".config",
+    ],
     outs = [
         "System.map",
         "arch/x86/boot/bzImage",
@@ -33,7 +37,7 @@ kernel_build(
     ],
     #module_outs = ["xt_mark.ko"],
     build_config = "build.config.x86_64",
+    kernel_config = ":kernel.config",
     kernel_dir = "external/linux",
     skip_defconfig = True,
-    kernel_config = ":kernel.config",
 )

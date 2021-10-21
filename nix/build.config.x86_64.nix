@@ -1,8 +1,9 @@
 { pkgs ? import ./nixpkgs.nix {
-  config = { };
-  overlays = [ ];
-  system = builtins.currentSystem;
-} }:
+    config = { };
+    overlays = [ ];
+    system = builtins.currentSystem;
+  }
+}:
 
 let
   kernel_x86_64_env = pkgs.buildEnv {
@@ -64,7 +65,8 @@ let
       }
     '';
   };
-in pkgs.stdenv.mkDerivation {
+in
+pkgs.stdenv.mkDerivation {
   name = "kernel_x86_64_toolchain";
   phases = [ "installPhase" ];
   installPhase = ''
