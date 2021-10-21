@@ -46,7 +46,7 @@ index 935befb..e57c65c 100644
 +    ],
  )
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..e28ece3 100644
+index fd30d4d..8abd43d 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
 @@ -24,7 +24,7 @@ _kernel_build_implicit_outs = [
@@ -95,17 +95,15 @@ index fd30d4d..e28ece3 100644
            source {setup_env}
          # capture it as a file to be sourced in downstream rules
            {preserve_env} > {out}
-@@ -380,8 +389,8 @@ def _kernel_env_impl(ctx):
+@@ -380,6 +389,7 @@ def _kernel_env_impl(ctx):
          setup_env = setup_env.path,
          preserve_env = preserve_env.path,
          out = out_file.path,
 +        kernel_dir = ctx.attr.kernel_dir,
      )
--
+ 
      _debug_print_scripts(ctx, command)
-     ctx.actions.run_shell(
-         inputs = ctx.files.srcs + [
-@@ -432,9 +441,6 @@ def _get_tools(toolchain_version):
+@@ -432,9 +442,6 @@ def _get_tools(toolchain_version):
          Label(e)
          for e in (
              "//build:kernel-build-scripts",
@@ -115,7 +113,7 @@ index fd30d4d..e28ece3 100644
          )
      ]
  
-@@ -479,6 +485,10 @@ _kernel_env = rule(
+@@ -479,6 +486,10 @@ _kernel_env = rule(
          "toolchain_version": attr.string(
              doc = "the toolchain to use for this environment",
          ),
@@ -126,11 +124,10 @@ index fd30d4d..e28ece3 100644
          "_tools": attr.label_list(default = _get_tools),
          "_host_tools": attr.label(default = "//build:host-tools"),
          "_build_utils_sh": attr.label(
-@@ -502,9 +512,16 @@ def _kernel_config_impl(ctx):
+@@ -502,9 +513,15 @@ def _kernel_config_impl(ctx):
              "Makefile",
              "configs/",
              "scripts/",
-+            "include/",
 +            ".config",
          ]])
      ]
@@ -143,23 +140,19 @@ index fd30d4d..e28ece3 100644
      config = ctx.outputs.config
      include_tar_gz = ctx.outputs.include_tar_gz
  
-@@ -546,15 +563,20 @@ def _kernel_config_impl(ctx):
-         # Pre-defconfig commands
+@@ -547,6 +564,9 @@ def _kernel_config_impl(ctx):
            eval ${{PRE_DEFCONFIG_CMDS}}
          # Actual defconfig
--          make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
+           make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
 +          if [[ "{skip_defconfig}" != "" ]]; then
-+            make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
 +            cp "{kernel_config}" ${{OUT_DIR}}/.config
 +          fi
          # Post-defconfig commands
            eval ${{POST_DEFCONFIG_CMDS}}
          # LTO configuration
-         {lto_command}
-         # Grab outputs
+@@ -555,6 +575,8 @@ def _kernel_config_impl(ctx):
            mv ${{OUT_DIR}}/.config {config}
--          tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
-+          tar czf {include_tar_gz} -C ${{KERNEL_DIR}} include/
+           tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
          """.format(
 +        skip_defconfig = ctx.attr.skip_defconfig,
 +        kernel_config = kernel_config_path,
@@ -177,6 +170,15 @@ index fd30d4d..e28ece3 100644
          "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
      },
  )
+@@ -900,7 +926,7 @@ def _kernel_module_impl(ctx):
+              # Remove {modules_staging_dir} because they are not declared
+                rm -rf {modules_staging_dir}
+              # Move Module.symvers
+-               mv ${{OUT_DIR}}/${{ext_mod_rel}}/Module.symvers {module_symvers}
++               mv ${{OUT_DIR}}/../${{ext_mod_rel}}/Module.symvers {module_symvers}
+                """.format(
+         ext_mod = ctx.file.makefile.dirname,
+         search_and_mv_output = ctx.file._search_and_mv_output.path,
 diff --git a/kleaf/preserve_env.sh b/kleaf/preserve_env.sh
 index 4eb3c82..5889bb7 100755
 --- a/kleaf/preserve_env.sh

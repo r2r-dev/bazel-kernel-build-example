@@ -1,0 +1,6 @@
+load("@kleaf//build/kleaf:kernel.bzl", "kernel_module")
+
+kernel_module(
+    name = "hello",
+    kernel_build = "@linux//:kernel_x86_64",
+)

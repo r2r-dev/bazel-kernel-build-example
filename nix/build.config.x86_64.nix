@@ -42,7 +42,6 @@ let
       LIBRARY_PATH=${kernel_x86_64_env}/lib
       ARCH=x86_64
       LLVM_IAS=0
-      SKIP_MRPROPER=0
       DEFCONFIG=defconfig
 
       MAKE_GOALS="
@@ -58,6 +57,10 @@ let
       modules.builtin
       modules.builtin.modinfo
       "
+      POST_DEFCONFIG_CMDS="include"
+      function include() {
+        make -C ''${KERNEL_DIR} ''${TOOL_ARGS} O=''${OUT_DIR} include
+      }
     '';
   };
 in pkgs.stdenv.mkDerivation {
