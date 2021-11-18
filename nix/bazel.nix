@@ -10,7 +10,12 @@ let
         "https://android.googlesource.com/platform/build/bazel_common_rules";
       rev = "3b65aae27e728cb48560a6e76b8351c93c10d794";
     };
-    phases = [ "unpackPhase" ];
+    patches = [ ./02.bazel_common_rules.patch ];
+    phases = [ "unpackPhase" "patchPhase" "installPhase" ];
+    installPhase = ''
+      mkdir -p $out
+      cp -r ./* $out/
+    '';
   };
 
 in
@@ -25,10 +30,10 @@ in
     phases = [ "unpackPhase" "patchPhase" "installPhase" ];
     patches = [ ./01.kleaf.patch ];
     installPhase = ''
-      mkdir -p $out/build
-      cp -R ./* $out/build 
-      cp -r ${aplatform.src} $out/build/bazel_common_rules
-      ln -s $out/build/kleaf/bazel.WORKSPACE $out/WORKSPACE
+      mkdir -p $out/common
+      cp -r ./* $out/common 
+      cp -r ${aplatform} $out/common/bazel_common_rules
+      ln -s $out/common/kleaf/bazel.WORKSPACE $out/WORKSPACE
     '';
   };
 

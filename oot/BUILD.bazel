@@ -1,6 +1,40 @@
-load("@kleaf//build/kleaf:kernel.bzl", "kernel_module")
+load("@kleaf//common/kleaf:kernel.bzl", "kernel_module")
+
+load("//lib:fileset.bzl", "fileset")
+load("//lib:makefile.bzl", "makefile")
+
+fileset(
+    name = "headers",
+    srcs = [
+      "public_include/hello.h",
+    ],
+    mappings = {
+      "public_include/": "drivers/",
+    },
+) 
+
+makefile(
+    name = "makefile",
+    module_name = "hello",
+    srcs = [
+        "src/hello.c",
+    ],
+    hdrs = [
+        ":drivers/hello.h",
+    ],
+    flags = [
+        "ccflags-y += -Werror",
+        "ccflags-y += -Wno-error=deprecated-declarations -mfentry",
+    ],
+    output_file = "Makefile",
+)
 
 kernel_module(
     name = "hello",
     kernel_build = "@linux//:kernel_x86_64",
+    srcs = [
+      "src/hello.c",
+      ":drivers/hello.h",
+    ],
+    makefile = ":Makefile",
 )

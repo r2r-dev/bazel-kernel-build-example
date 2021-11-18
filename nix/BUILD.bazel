@@ -2,5 +2,5 @@ exports_files([
     "bazel.nix",
     "nixpkgs.nix",
     "01.kleaf.patch",
-    "02.kernel.patch",
+    "02.bazel_common_rules.patch",
 ])

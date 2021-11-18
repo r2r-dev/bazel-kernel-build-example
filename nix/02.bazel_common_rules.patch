@@ -1,0 +1,94 @@
+diff --git a/README.md b/README.md
+index 21dbb5a..166ac73 100644
+--- a/README.md
++++ b/README.md
+@@ -4,8 +4,8 @@ This directory contains common Bazel rules and tools shared between the Platform
+ and Kernel builds.
+ 
+ For platform-specific rules, place them in the platform checkout's
+-[//build/bazel/rules](https://android.googlesource.com/platform/build/bazel/+/master/rules/)
++[//common/bazel/rules](https://android.googlesource.com/platform/build/bazel/+/master/rules/)
+ directory.
+ 
+-For kernel-specific rules, place them in kernel checkout's [//build/kleaf
++For kernel-specific rules, place them in kernel checkout's [//common/kleaf
+ directory](https://android.googlesource.com/kernel/build/+/master/kleaf/).
+diff --git a/dist/BUILD b/dist/BUILD
+index d275dec..1e9134d 100644
+--- a/dist/BUILD
++++ b/dist/BUILD
+@@ -11,7 +11,7 @@ bzl_library(
+     visibility = ["//visibility:public"],
+ )
+ 
+-# bazel run --package_path=out/soong/workspace //build/bazel_common_rules/dist:dist_bionic_example -- --dist_dir=/tmp/dist
++# bazel run --package_path=out/soong/workspace //common/bazel_common_rules/dist:dist_bionic_example -- --dist_dir=/tmp/dist
+ copy_to_dist_dir(
+     name = "dist_bionic_example",
+     data = [
+diff --git a/dist/dist.bzl b/dist/dist.bzl
+index ea50148..a243774 100644
+--- a/dist/dist.bzl
++++ b/dist/dist.bzl
+@@ -79,7 +79,7 @@ def copy_to_dist_dir(name, data = [], archives = []):
+ 
+     copy_file(
+         name = name + "_dist_tool",
+-        src = "//build/bazel_common_rules/dist:dist.py",
++        src = "//common/bazel_common_rules/dist:dist.py",
+         out = name + "_dist.py",
+     )
+ 
+diff --git a/docs/docs.bzl b/docs/docs.bzl
+index 1fe02bc..d198bf6 100644
+--- a/docs/docs.bzl
++++ b/docs/docs.bzl
+@@ -12,7 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
++load("//common/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
+ load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
+ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+ 
+@@ -22,9 +22,9 @@ def docs(
+         srcs,
+         default = None,
+         deps = [],
+-        func_template = "//build/bazel_common_rules/docs:templates/func.vm",
+-        provider_template = "//build/bazel_common_rules/docs:templates/provider.vm",
+-        rule_template = "//build/bazel_common_rules/docs:templates/rule.vm"):
++        func_template = "//common/bazel_common_rules/docs:templates/func.vm",
++        provider_template = "//common/bazel_common_rules/docs:templates/provider.vm",
++        rule_template = "//common/bazel_common_rules/docs:templates/rule.vm"):
+     """Build docs.
+ 
+     The following rules are also generated:
+@@ -93,7 +93,7 @@ def docs(
+     native.genrule(
+         name = name,
+         srcs = [
+-            "//build/bazel_common_rules/docs:index.html",
++            "//common/bazel_common_rules/docs:index.html",
+             ":{name}_default_file.html.frag".format(name = name),
+             ":{name}_markdown_files".format(name = name),
+         ],
+@@ -101,14 +101,14 @@ def docs(
+             name + "/root/index.html",
+         ],
+         cmd = """
+-            $(location //build/bazel_common_rules/docs:insert_resource.py) \
+-              --infile $(location //build/bazel_common_rules/docs:index.html) \
++            $(location //common/bazel_common_rules/docs:insert_resource.py) \
++              --infile $(location //common/bazel_common_rules/docs:index.html) \
+               --outfile $(location {name}/root/index.html) \
+               $(location :{name}_default_file.html.frag) \
+               $(locations :{name}_markdown_files)
+         """.format(name = name),
+         tools = [
+-            "//build/bazel_common_rules/docs:insert_resource.py",
++            "//common/bazel_common_rules/docs:insert_resource.py",
+         ],
+     )
+ 

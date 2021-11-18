@@ -1,4 +1,7 @@
-obj-m := hello.o
+obj-m := {NAME}.o
+{SOURCES}
+{INCLUDES}
+{FLAGS}
 
 SRC := $(shell pwd)
 

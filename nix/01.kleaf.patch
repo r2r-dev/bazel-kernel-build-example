@@ -14,6 +14,61 @@ index be9a376..a8b9ff2 100644
      ],
      cmd = "for i in $(OUTS); do ln -s $$(which $$(basename $$i)) $$i; done",
      tags = ["no-remote"],
+diff --git a/kleaf/BUILD.bazel b/kleaf/BUILD.bazel
+index b44b2b0..be5d2f5 100644
+--- a/kleaf/BUILD.bazel
++++ b/kleaf/BUILD.bazel
+@@ -15,8 +15,8 @@
+ load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
+ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+ load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+-load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
+-load("//build/bazel_common_rules/docs:docs.bzl", "docs")
++load("//common/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
++load("//common/bazel_common_rules/docs:docs.bzl", "docs")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
+@@ -52,7 +52,7 @@ exports_files([
+ ])
+ 
+ # Docs. To view them:
+-#   bazel run //build/kleaf:docs_server
++#   bazel run //common/kleaf:docs_server
+ 
+ docs(
+     name = "docs",
+@@ -62,7 +62,7 @@ docs(
+     ],
+     default = "kernel.bzl",
+     deps = [
+-        "//build/bazel_common_rules/dist",
++        "//common/bazel_common_rules/dist",
+         "@bazel_skylib//rules:common_settings",
+     ],
+ )
+diff --git a/kleaf/README.md b/kleaf/README.md
+index 51ba4f9..5337c5b 100644
+--- a/kleaf/README.md
++++ b/kleaf/README.md
+@@ -75,7 +75,7 @@ The `kernel_build()` macro provided by this package is to be used in
+ is (defining the GKI build):
+ 
+ ```
+-load("//build/kleaf:kernel.bzl", "kernel_build")
++load("//common/kleaf:kernel.bzl", "kernel_build")
+ 
+ kernel_build(
+     name = "kernel",
+@@ -95,7 +95,7 @@ invocation (though limited to the currently available features in *Kleaf*):
+ The `kernel_module()` macro defines a kernel module target. Example:
+ 
+ ```
+-load("//build/kleaf:kernel.bzl", "kernel_module")
++load("//common/kleaf:kernel.bzl", "kernel_module")
+ 
+ kernel_module(
+     name = "nfc",
 diff --git a/kleaf/bazel.WORKSPACE b/kleaf/bazel.WORKSPACE
 index 935befb..e57c65c 100644
 --- a/kleaf/bazel.WORKSPACE
@@ -45,8 +100,39 @@ index 935befb..e57c65c 100644
 +        "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
 +    ],
  )
+diff --git a/kleaf/common.bazelrc b/kleaf/common.bazelrc
+index d93c051..ca34002 100644
+--- a/kleaf/common.bazelrc
++++ b/kleaf/common.bazelrc
+@@ -31,8 +31,8 @@ try-import %workspace%/user.bazelrc
+ build --action_env=SOURCE_DATE_EPOCH
+ 
+ # flag aliases for build settings
+-build --flag_alias=lto=//build/kleaf:lto
++build --flag_alias=lto=//common/kleaf:lto
+ 
+ # add a flag alias to allow passing --debug_* flags
+-build --flag_alias=debug_annotate_scripts=//build/kleaf:debug_annotate_scripts
+-build --flag_alias=debug_print_scripts=//build/kleaf:debug_print_scripts
++build --flag_alias=debug_annotate_scripts=//common/kleaf:debug_annotate_scripts
++build --flag_alias=debug_print_scripts=//common/kleaf:debug_print_scripts
+diff --git a/kleaf/common_kernels.bzl b/kleaf/common_kernels.bzl
+index 71730f6..6030e8e 100644
+--- a/kleaf/common_kernels.bzl
++++ b/kleaf/common_kernels.bzl
+@@ -12,8 +12,8 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-load("//build/kleaf:kernel.bzl", "kernel_build")
+-load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
++load("//common/kleaf:kernel.bzl", "kernel_build")
++load("//common/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
+ 
+ _common_outs = [
+     "System.map",
 diff --git a/kleaf/kernel.bzl b/kleaf/kernel.bzl
-index fd30d4d..8abd43d 100644
+index fd30d4d..4dfb04d 100644
 --- a/kleaf/kernel.bzl
 +++ b/kleaf/kernel.bzl
 @@ -24,7 +24,7 @@ _kernel_build_implicit_outs = [
@@ -58,6 +144,15 @@ index fd30d4d..8abd43d 100644
  
  def _debug_print_scripts(ctx, command):
      if ctx.attr._debug_print_scripts[BuildSettingInfo].value:
+@@ -83,7 +83,7 @@ kernel_build_config(
+ 
+ """,
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
 @@ -109,6 +109,9 @@ def kernel_build(
          module_outs = [],
          generate_vmlinux_btf = False,
@@ -103,17 +198,32 @@ index fd30d4d..8abd43d 100644
      )
  
      _debug_print_scripts(ctx, command)
-@@ -432,9 +442,6 @@ def _get_tools(toolchain_version):
+@@ -431,10 +441,7 @@ def _get_tools(toolchain_version):
+     return [
          Label(e)
          for e in (
-             "//build:kernel-build-scripts",
+-            "//build:kernel-build-scripts",
 -            "//prebuilts/build-tools:linux-x86",
 -            "//prebuilts/kernel-build-tools:linux-x86",
 -            "//prebuilts/clang/host/linux-x86/clang-%s:binaries" % toolchain_version,
++            "//common:kernel-build-scripts",
          )
      ]
  
-@@ -479,6 +486,10 @@ _kernel_env = rule(
+@@ -468,27 +475,31 @@ _kernel_env = rule(
+         ),
+         "setup_env": attr.label(
+             allow_single_file = True,
+-            default = Label("//build:_setup_env.sh"),
++            default = Label("//common:_setup_env.sh"),
+             doc = "label referring to _setup_env.sh",
+         ),
+         "preserve_env": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:preserve_env.sh"),
++            default = Label("//common/kleaf:preserve_env.sh"),
+             doc = "label referring to the script capturing the environment",
+         ),
          "toolchain_version": attr.string(
              doc = "the toolchain to use for this environment",
          ),
@@ -122,13 +232,28 @@ index fd30d4d..8abd43d 100644
 +            doc = "kernel source directory. mandatory if kernel is an external repository",
 +        ),
          "_tools": attr.label_list(default = _get_tools),
-         "_host_tools": attr.label(default = "//build:host-tools"),
+-        "_host_tools": attr.label(default = "//build:host-tools"),
++        "_host_tools": attr.label(default = "//common:host-tools"),
          "_build_utils_sh": attr.label(
-@@ -502,9 +513,15 @@ def _kernel_config_impl(ctx):
+             allow_single_file = True,
+-            default = Label("//build:build_utils.sh"),
++            default = Label("//common:build_utils.sh"),
+         ),
+         "_debug_annotate_scripts": attr.label(
+-            default = "//build/kleaf:debug_annotate_scripts",
++            default = "//common/kleaf:debug_annotate_scripts",
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -502,9 +513,16 @@ def _kernel_config_impl(ctx):
              "Makefile",
              "configs/",
              "scripts/",
 +            ".config",
++	    "certs",
          ]])
      ]
  
@@ -140,7 +265,7 @@ index fd30d4d..8abd43d 100644
      config = ctx.outputs.config
      include_tar_gz = ctx.outputs.include_tar_gz
  
-@@ -547,6 +564,9 @@ def _kernel_config_impl(ctx):
+@@ -547,6 +565,9 @@ def _kernel_config_impl(ctx):
            eval ${{PRE_DEFCONFIG_CMDS}}
          # Actual defconfig
            make -C ${{KERNEL_DIR}} ${{TOOL_ARGS}} O=${{OUT_DIR}} ${{DEFCONFIG}}
@@ -150,7 +275,7 @@ index fd30d4d..8abd43d 100644
          # Post-defconfig commands
            eval ${{POST_DEFCONFIG_CMDS}}
          # LTO configuration
-@@ -555,6 +575,8 @@ def _kernel_config_impl(ctx):
+@@ -555,6 +576,8 @@ def _kernel_config_impl(ctx):
            mv ${{OUT_DIR}}/.config {config}
            tar czf {include_tar_gz} -C ${{OUT_DIR}} include/
          """.format(
@@ -159,26 +284,143 @@ index fd30d4d..8abd43d 100644
          config = config.path,
          include_tar_gz = include_tar_gz.path,
          lto_command = lto_command,
-@@ -601,6 +623,10 @@ _kernel_config = rule(
+@@ -600,8 +623,12 @@ _kernel_config = rule(
+             mandatory = True,
              doc = "the packaged include/ files",
          ),
-         "lto": attr.label(default = "//build/kleaf:lto"),
+-        "lto": attr.label(default = "//build/kleaf:lto"),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "lto": attr.label(default = "//common/kleaf:lto"),
 +        "skip_defconfig": attr.bool(default = False),
 +        "kernel_config": attr.label(
 +            allow_single_file = True,
 +        ),
-         "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
      },
  )
-@@ -900,7 +926,7 @@ def _kernel_module_impl(ctx):
+ 
+@@ -749,13 +776,13 @@ _kernel_build = rule(
+         "implicit_outs": attr.string_list(doc = "Like `outs`, but not in dist"),
+         "_search_and_mv_output": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:search_and_mv_output.py"),
++            default = Label("//common/kleaf:search_and_mv_output.py"),
+             doc = "label referring to the script to process outputs",
+         ),
+         "deps": attr.label_list(
+             allow_files = True,
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -800,7 +827,7 @@ _modules_prepare = rule(
+             mandatory = True,
+             doc = "the packaged ${OUT_DIR} files",
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -900,7 +927,9 @@ def _kernel_module_impl(ctx):
               # Remove {modules_staging_dir} because they are not declared
                 rm -rf {modules_staging_dir}
               # Move Module.symvers
 -               mv ${{OUT_DIR}}/${{ext_mod_rel}}/Module.symvers {module_symvers}
-+               mv ${{OUT_DIR}}/../${{ext_mod_rel}}/Module.symvers {module_symvers}
++               if [ "$(realpath ${{OUT_DIR}}/../${{ext_mod_rel}}/Module.symvers)" != "$(realpath "{module_symvers}")" ]; then
++                 mv ${{OUT_DIR}}/../${{ext_mod_rel}}/Module.symvers {module_symvers}
++               fi
                 """.format(
          ext_mod = ctx.file.makefile.dirname,
          search_and_mv_output = ctx.file._search_and_mv_output.path,
+@@ -977,14 +1006,14 @@ _kernel_module = rule(
+         "outs": attr.output_list(),
+         "_search_and_mv_output": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:search_and_mv_output.py"),
++            default = Label("//common/kleaf:search_and_mv_output.py"),
+             doc = "Label referring to the script to process outputs",
+         ),
+         "_modules_prepare": attr.label(
+             default = _get_modules_prepare,
+             providers = [_KernelEnvInfo],
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -1265,15 +1294,15 @@ In `foo_dist`, specifying `foo_modules_install` in `data` won't include
+             default = _get_modules_prepare,
+             providers = [_KernelEnvInfo],
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+         "_check_duplicated_files_in_archives": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:check_duplicated_files_in_archives.py"),
++            default = Label("//common/kleaf:check_duplicated_files_in_archives.py"),
+             doc = "Label referring to the script to process outputs",
+         ),
+         "_search_and_mv_output": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:search_and_mv_output.py"),
++            default = Label("//common/kleaf:search_and_mv_output.py"),
+             doc = "Label referring to the script to process outputs",
+         ),
+     },
+@@ -1316,7 +1345,7 @@ _kernel_uapi_headers = rule(
+             providers = [_KernelEnvInfo],
+             doc = "the kernel_config target",
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -1374,7 +1403,7 @@ _kernel_headers = rule(
+             mandatory = True,
+             providers = [_KernelEnvInfo],
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -1417,7 +1446,7 @@ _vmlinux_btf = rule(
+             mandatory = True,
+             providers = [_KernelEnvInfo],
+         ),
+-        "_debug_print_scripts": attr.label(default = "//build/kleaf:debug_print_scripts"),
++        "_debug_print_scripts": attr.label(default = "//common/kleaf:debug_print_scripts"),
+     },
+ )
+ 
+@@ -1510,7 +1539,7 @@ def _build_modules_image_attrs_common(additional = {}):
+             allow_files = True,
+         ),
+         "_debug_print_scripts": attr.label(
+-            default = "//build/kleaf:debug_print_scripts",
++            default = "//common/kleaf:debug_print_scripts",
+         ),
+     }
+     ret.update(additional)
+@@ -1735,11 +1764,11 @@ Execute `build_boot_images` in `build_utils.sh`.""",
+             allow_single_file = True,
+         ),
+         "_debug_print_scripts": attr.label(
+-            default = "//build/kleaf:debug_print_scripts",
++            default = "//common/kleaf:debug_print_scripts",
+         ),
+         "_search_and_mv_output": attr.label(
+             allow_single_file = True,
+-            default = Label("//build/kleaf:search_and_mv_output.py"),
++            default = Label("//common/kleaf:search_and_mv_output.py"),
+         ),
+     },
+ )
 diff --git a/kleaf/preserve_env.sh b/kleaf/preserve_env.sh
 index 4eb3c82..5889bb7 100755
 --- a/kleaf/preserve_env.sh
@@ -198,3 +440,33 @@ index 4eb3c82..5889bb7 100755
  
  ( export -p; export -f ) | \
    # Remove the reference to PWD itself
+diff --git a/kleaf/rbe.bazelrc b/kleaf/rbe.bazelrc
+index ad1f22f..cee496a 100644
+--- a/kleaf/rbe.bazelrc
++++ b/kleaf/rbe.bazelrc
+@@ -8,9 +8,9 @@ build:remote --jobs=50
+ # The toolchain container used for execution is defined in the target indicated
+ # by "extra_execution_platforms", "host_platform" and "platforms".
+ # More about platforms: https://docs.bazel.build/versions/master/platforms.html
+-build:remote --extra_execution_platforms=//build/kleaf:rbe_platform
+-build:remote --host_platform=//build/kleaf:rbe_platform
+-build:remote --platforms=//build/kleaf:rbe_platform
++build:remote --extra_execution_platforms=//common/kleaf:rbe_platform
++build:remote --host_platform=//common/kleaf:rbe_platform
++build:remote --platforms=//common/kleaf:rbe_platform
+ 
+ # Starting with Bazel 0.27.0 strategies do not need to be explicitly
+ # defined. See https://github.com/bazelbuild/bazel/issues/7480
+diff --git a/kleaf/search_and_mv_output.py b/kleaf/search_and_mv_output.py
+index d69acc8..47e45b6 100755
+--- a/kleaf/search_and_mv_output.py
++++ b/kleaf/search_and_mv_output.py
+@@ -16,6 +16,8 @@ def handle_outputs_without_slash(srcdir, dstdir, outputs):
+   unhandled = []
+   for out in outputs:
+     if os.path.exists(os.path.join(srcdir, out)):
++      if os.path.exists(os.path.join(dstdir, out)):
++        continue
+       shutil.move(os.path.join(srcdir, out), dstdir)
+     else:
+       unhandled.append(out)

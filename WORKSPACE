@@ -31,6 +31,17 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+BAZEL_LIB_COMMIT = "0d2981f2881cbe3eabc8264a5147d843c577b8cf"
+
+http_archive(
+    name = "aspect_bazel_lib",
+    sha256 = "8a3bfec57cb57c79b2540f16b34c348415724b67be55f616785b4f35c555ad96",
+    strip_prefix = "bazel-lib-%s" % BAZEL_LIB_COMMIT,
+    urls = [
+        "https://github.com/aspect-build/bazel-lib/archive/%s.tar.gz" % BAZEL_LIB_COMMIT,
+    ],
+)
+
 RULES_CC_COMMIT = "68cb652a71e7e7e2858c50593e5a9e3b94e5b9a9"
 
 http_archive(
@@ -100,6 +111,7 @@ nixpkgs_package(
         "//nix:bazel.nix",
         "//nix:nixpkgs.nix",
         "//nix:01.kleaf.patch",
+        "//nix:02.bazel_common_rules.patch",
     ],
     repositories = NIX_REPOS,
 )
