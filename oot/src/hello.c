@@ -1,4 +1,4 @@
-#include "hello.h"
+#include "drivers/hello.h"
 
 int init_module(void)
 {

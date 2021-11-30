@@ -9,22 +9,25 @@ fileset(
       "public_include/hello.h",
     ],
     mappings = {
-      "public_include/": "drivers/",
+      "public_include/": "include/drivers/",
     },
 ) 
 
 makefile(
     name = "makefile",
     module_name = "hello",
+    strip_include_paths = [
+        "drivers",
+    ],
     srcs = [
         "src/hello.c",
     ],
-    hdrs = [
-        ":drivers/hello.h",
+    deps = [
+      ":headers",
     ],
     flags = [
         "ccflags-y += -Werror",
-        "ccflags-y += -Wno-error=deprecated-declarations -mfentry",
+        "ccflags-y += -Wno-error=deprecated-declarations",
     ],
     output_file = "Makefile",
 )
@@ -34,7 +37,7 @@ kernel_module(
     kernel_build = "@linux//:kernel_x86_64",
     srcs = [
       "src/hello.c",
-      ":drivers/hello.h",
+      ":include/drivers/hello.h",
     ],
     makefile = ":Makefile",
 )

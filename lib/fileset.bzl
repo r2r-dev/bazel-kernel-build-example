@@ -31,7 +31,6 @@ def _fileset_impl(ctx):
 
 _fileset = rule(
     attrs = {
-        "srcs": attr.label_list(allow_files = True),
         "maps": attr.string_dict(
             mandatory = True,
             allow_empty = False,
@@ -40,6 +39,7 @@ _fileset = rule(
             mandatory = True,
             allow_empty = False,
         ),
+        "srcs": attr.label_list(allow_files = True),
     },
     executable = False,
     implementation = _fileset_impl,
@@ -55,10 +55,10 @@ def fileset(name, srcs = [], mappings = {}, tags = [], **kwargs):
             if src.startswith(prefix):
                 f = destination + src[len(prefix):]
                 maps[src] = f
-                outs += [f]
+                outs.append(f)
                 done = True
         if not done:
-            rem += [src]
+            rem.append(src)
 
     if outs:
         _fileset(
@@ -75,3 +75,4 @@ def fileset(name, srcs = [], mappings = {}, tags = [], **kwargs):
         tags = tags,
         **kwargs
     )
+
