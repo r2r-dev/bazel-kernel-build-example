@@ -6,45 +6,48 @@
 }:
 
 let
-  kernel_x86_64_env = pkgs.buildEnv {
-    name = "kernel_x86_64_env";
-    paths = with pkgs; [
-      bash
-      bc
-      binutils
-      coreutils
-      dateutils
-      diffutils
-      findutils
-      gawk
-      gcc6
-      glibc.bin
-      gnugrep
-      gnumake
-      gnused
-      gnutar
-      gzip
-      perl
-      which
-      python37
+  packages = with pkgs; [
+    bash
+    bc
+    binutils-unwrapped
+    coreutils
+    dateutils
+    diffutils
+    findutils
+    gawk
+    gcc49
+    glibc.bin
+    gnugrep
+    gnumake
+    gnused
+    gnutar
+    gzip
+    perl
+    which
+    python37
 
-      libelf
-      openssl
-      openssl.dev
-      openssl.out
-    ];
-    pathsToLink = [ "/bin" "/include" "/lib" ];
-    ignoreCollisions = true;
-  };
+    libelf
+    openssl
+    openssl.dev
+    openssl.out
+  ];
+
+  bins = pkgs.lib.strings.makeSearchPathOutput "bin" "bin" packages;
+  libs = pkgs.lib.strings.makeSearchPathOutput "lib" "lib" packages;
+  inc = pkgs.lib.strings.makeSearchPathOutput "dev" "include" [
+    pkgs.openssl
+    pkgs.libelf
+  ];
   build = pkgs.writeTextFile {
     name = "build.config.x86_64";
     text = ''
-      PATH=${kernel_x86_64_env}/bin
-      CPATH=${kernel_x86_64_env}/include
-      LIBRARY_PATH=${kernel_x86_64_env}/lib
+      PATH=${bins}
+      CPATH=${inc}
+      LIBRARY_PATH=${libs}
       ARCH=x86_64
       LLVM_IAS=0
       DEFCONFIG=defconfig
+
 
       MAKE_GOALS="
       bzImage
@@ -74,3 +77,4 @@ pkgs.stdenv.mkDerivation {
     ln -s ${build} $out/build.config.x86_64
   '';
 }
+
