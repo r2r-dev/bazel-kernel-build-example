@@ -1,5 +1,6 @@
 exports_files([
-    "BUILD.kernel",
-    "config",
     "01.kernel.patch",
+    "BUILD.kernel",
+    "kernel.config.aarch64",
+    "kernel.config.x86_64",
 ])

@@ -6,7 +6,9 @@
 }:
 
 let
-  packages = with pkgs; [
+  crossPkgs = pkgs.pkgsCross.aarch64-multiplatform;
+
+  packages = with crossPkgs.buildPackages; [
     bash
     bc
     binutils-unwrapped
@@ -15,7 +17,7 @@ let
     diffutils
     findutils
     gawk
-    gcc49
+    gcc
     glibc.bin
     gnugrep
     gnumake
@@ -25,18 +27,24 @@ let
     perl
     which
     python37
+    pkgconfig
 
     libelf
     openssl
     openssl.dev
     openssl.out
+  ] ++ [
+    pkgs.gcc
   ];
 
   bins = pkgs.lib.strings.makeSearchPathOutput "bin" "bin" packages;
   libs = pkgs.lib.strings.makeSearchPathOutput "lib" "lib" packages;
+  clibs = pkgs.lib.strings.makeSearchPathOutput "lib" "lib" [
+    crossPkgs.glibc
+  ];
   inc = pkgs.lib.strings.makeSearchPathOutput "dev" "include" [
-    pkgs.openssl
-    pkgs.libelf
+    crossPkgs.openssl
+    crossPkgs.libelf
   ];
   build = pkgs.writeTextFile {
     name = "build.config";
@@ -44,18 +52,21 @@ let
       PATH=${bins}
       CPATH=${inc}
       LIBRARY_PATH=${libs}
-      ARCH=x86_64
+      HOSTCC=gcc
+      CC=aarch64-unknown-linux-gnu-gcc
+      LD=aarch64-unknown-linux-gnu-ld
+      ARCH=arm64
       LLVM_IAS=0
       DEFCONFIG=defconfig
 
 
       MAKE_GOALS="
-      bzImage
+      Image
       modules
       "
 
       FILES="
-      arch/x86/boot/bzImage
+      arch/arm64/boot/Image
       vmlinux
       System.map
       vmlinux.symvers
@@ -70,7 +81,7 @@ let
   };
 in
 pkgs.stdenv.mkDerivation {
-  name = "kernel_x86_64_toolchain";
+  name = "kernel_aarch64_toolchain";
   phases = [ "installPhase" ];
   installPhase = ''
     mkdir $out

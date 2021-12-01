@@ -14,8 +14,8 @@ fileset(
 ) 
 
 makefile(
-    name = "makefile",
-    module_name = "hello",
+    name = "makefile_aarch64",
+    module_name = "hello_aarch64",
     strip_include_paths = [
         "drivers",
     ],
@@ -29,15 +29,44 @@ makefile(
         "ccflags-y += -Werror",
         "ccflags-y += -Wno-error=deprecated-declarations",
     ],
-    output_file = "Makefile",
+    output_file = "aarch64/Makefile",
+)
+
+makefile(
+    name = "makefile_x86_64",
+    module_name = "hello_x86_64",
+    strip_include_paths = [
+        "drivers",
+    ],
+    srcs = [
+        "src/hello.c",
+    ],
+    deps = [
+      ":headers",
+    ],
+    flags = [
+        "ccflags-y += -Werror",
+        "ccflags-y += -Wno-error=deprecated-declarations",
+    ],
+    output_file = "x86_64/Makefile",
 )
 
 kernel_module(
-    name = "hello",
+    name = "hello_aarch64",
+    kernel_build = "@linux//:kernel_aarch64",
+    srcs = [
+      "src/hello.c",
+      ":include/drivers/hello.h",
+    ],
+    makefile = ":aarch64/Makefile",
+)
+
+kernel_module(
+    name = "hello_x86_64",
     kernel_build = "@linux//:kernel_x86_64",
     srcs = [
       "src/hello.c",
       ":include/drivers/hello.h",
     ],
-    makefile = ":Makefile",
+    makefile = ":x86_64/Makefile",
 )

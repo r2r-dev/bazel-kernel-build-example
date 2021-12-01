@@ -118,8 +118,19 @@ nixpkgs_package(
 
 nixpkgs_package(
     name = "kernel_toolchain_x86_64",
-    build_file_content = 'exports_files(["build.config.x86_64"])',
+    build_file_content = 'exports_files(["build.config"])',
     nix_file = "//nix:build.config.x86_64.nix",
+    nix_file_deps = [
+        "//:flake.lock",
+        "//nix:nixpkgs.nix",
+    ],
+    repositories = NIX_REPOS,
+)
+
+nixpkgs_package(
+    name = "kernel_toolchain_aarch64",
+    build_file_content = 'exports_files(["build.config"])',
+    nix_file = "//nix:build.config.aarch64.nix",
     nix_file_deps = [
         "//:flake.lock",
         "//nix:nixpkgs.nix",
