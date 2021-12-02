@@ -1,72 +1,71 @@
 load("@kleaf//common/kleaf:kernel.bzl", "kernel_module")
-
 load("//lib:fileset.bzl", "fileset")
 load("//lib:makefile.bzl", "makefile")
 
 fileset(
     name = "headers",
     srcs = [
-      "public_include/hello.h",
+        "public_include/hello.h",
     ],
     mappings = {
-      "public_include/": "include/drivers/",
+        "public_include/": "include/drivers/",
     },
-) 
+)
 
 makefile(
     name = "makefile_aarch64",
-    module_name = "hello_aarch64",
-    strip_include_paths = [
-        "drivers",
-    ],
     srcs = [
         "src/hello.c",
-    ],
-    deps = [
-      ":headers",
     ],
     flags = [
         "ccflags-y += -Werror",
         "ccflags-y += -Wno-error=deprecated-declarations",
     ],
+    module_name = "hello_aarch64",
     output_file = "aarch64/Makefile",
+    strip_include_paths = [
+        "drivers",
+    ],
+    deps = [
+        ":headers",
+    ],
 )
 
 makefile(
     name = "makefile_x86_64",
-    module_name = "hello_x86_64",
-    strip_include_paths = [
-        "drivers",
-    ],
     srcs = [
         "src/hello.c",
-    ],
-    deps = [
-      ":headers",
     ],
     flags = [
         "ccflags-y += -Werror",
         "ccflags-y += -Wno-error=deprecated-declarations",
     ],
+    module_name = "hello_x86_64",
     output_file = "x86_64/Makefile",
+    strip_include_paths = [
+        "drivers",
+    ],
+    deps = [
+        ":headers",
+    ],
 )
 
 kernel_module(
     name = "hello_aarch64",
-    kernel_build = "@linux//:kernel_aarch64",
     srcs = [
-      "src/hello.c",
-      ":include/drivers/hello.h",
+        "src/hello.c",
+        ":include/drivers/hello.h",
     ],
+    kernel_build = "@linux//:kernel_aarch64",
     makefile = ":aarch64/Makefile",
 )
 
 kernel_module(
     name = "hello_x86_64",
-    kernel_build = "@linux//:kernel_x86_64",
     srcs = [
-      "src/hello.c",
-      ":include/drivers/hello.h",
+        "src/hello.c",
+        ":include/drivers/hello.h",
     ],
+    kernel_build = "@linux//:kernel_x86_64",
     makefile = ":x86_64/Makefile",
 )

@@ -75,4 +75,3 @@ def fileset(name, srcs = [], mappings = {}, tags = [], **kwargs):
         tags = tags,
         **kwargs
     )
-
