@@ -15,7 +15,7 @@ let
     diffutils
     findutils
     gawk
-    gcc49
+    gcc7
     glibc.bin
     gnugrep
     gnumake
