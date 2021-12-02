@@ -1,7 +1,9 @@
 ### Compile kernel with
-`bazel build @linux//:kernel_x86_64`
-`bazel build @linux//:kernel_aarch64`
+`bazel build @linux//:kernel`
+or
+`bazel build @linux//:kernel --platforms=aarch64-linux`
 
 ### Compile out-of-tree kernel module with
-`bazel build //oot:hello_x86_64`
-`bazel build //oot:hello_aarch64`
+`bazel build //oot:hello`
+or
+`bazel build //oot:hello --platforms=aarch64-linux`

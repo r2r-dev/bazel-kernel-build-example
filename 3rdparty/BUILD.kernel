@@ -4,31 +4,27 @@ load("@kleaf//common/kleaf:kernel.bzl", "kernel_build")
 package(default_visibility = ["//visibility:public"])
 
 copy_file(
-    name = "build_config_aarch64",
-    src = "@kernel_toolchain_aarch64//:build.config",
-    out = "build.config.aarch64",
-)
-
-copy_file(
-    name = "build_config_x86_64",
-    src = "@kernel_toolchain_x86_64//:build.config",
-    out = "build.config.x86_64",
+    name = "build_config",
+    src = select({
+         "@kernel-build-example//configs:aarch64-linux":"@kernel_toolchain_aarch64//:build.config",
+         "@kernel-build-example//configs:x86_64-linux": "@kernel_toolchain_x86_64//:build.config",
+         "//conditions:default":"@kernel_toolchain_x86_64//:build.config",
+    }),
+    out = "build.config",
 )
 
 copy_file(
     name = "kernel_config_aarch64",
-    src = "@kernel-build-example//3rdparty:kernel.config.aarch64",
-    out = "kernel.config.aarch64",
-)
-
-copy_file(
-    name = "kernel_config_x86_64",
-    src = "@kernel-build-example//3rdparty:kernel.config.x86_64",
-    out = "kernel.config.x86_64",
+    src = select({
+         "@kernel-build-example//configs:aarch64-linux":"@kernel-build-example//3rdparty:kernel.config.aarch64",
+         "@kernel-build-example//configs:x86_64-linux": "@kernel-build-example//3rdparty:kernel.config.x86_64",
+         "//conditions:default":"@kernel-build-example//3rdparty:kernel.config.x86_64",
+    }),
+    out = "kernel.config",
 )
 
 kernel_build(
-    name = "kernel_aarch64",
+    name = "kernel",
     srcs = glob(
         ["**"],
         exclude = [
@@ -38,42 +34,30 @@ kernel_build(
             ".git/**",
         ],
     ) + [
-        "build.config.aarch64",
-        "kernel.config.aarch64",
+        "build.config",
+        "kernel.config",
     ],
-    outs = [
-        "System.map",
-        "modules.builtin",
-        "vmlinux",
-    ],
-    build_config = "build.config.aarch64",
-    kernel_config = "kernel.config.aarch64",
-    kernel_dir = "external/linux",
-    skip_defconfig = True,
-)
-
-kernel_build(
-    name = "kernel_x86_64",
-    srcs = glob(
-        ["**"],
-        exclude = [
-            "android/*",
-            "BUILD.bazel",
-            "**/*.bzl",
-            ".git/**",
+    outs = {
+         "@kernel-build-example//configs:aarch64-linux": [
+              "System.map",
+              "modules.builtin",
+              "vmlinux",
         ],
-    ) + [
-        "build.config.x86_64",
-        "kernel.config.x86_64",
-    ],
-    outs = [
-        "System.map",
-        "arch/x86/boot/bzImage",
-        "modules.builtin",
-        "vmlinux",
-    ],
-    build_config = "build.config.x86_64",
-    kernel_config = "kernel.config.x86_64",
+         "@kernel-build-example//configs:x86_64-linux": [
+              "System.map",
+              "modules.builtin",
+              "vmlinux",
+              "arch/x86/boot/bzImage",
+        ],
+         "//conditions:default":[
+              "System.map",
+              "modules.builtin",
+              "vmlinux",
+              "arch/x86/boot/bzImage",
+        ],
+    },
+    build_config = "build.config",
+    kernel_config = "kernel.config",
     kernel_dir = "external/linux",
     skip_defconfig = True,
 )

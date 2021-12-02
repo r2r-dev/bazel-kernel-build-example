@@ -13,7 +13,7 @@ fileset(
 )
 
 makefile(
-    name = "makefile_aarch64",
+    name = "makefile",
     srcs = [
         "src/hello.c",
     ],
@@ -21,27 +21,8 @@ makefile(
         "ccflags-y += -Werror",
         "ccflags-y += -Wno-error=deprecated-declarations",
     ],
-    module_name = "hello_aarch64",
-    output_file = "aarch64/Makefile",
-    strip_include_paths = [
-        "drivers",
-    ],
-    deps = [
-        ":headers",
-    ],
-)
-
-makefile(
-    name = "makefile_x86_64",
-    srcs = [
-        "src/hello.c",
-    ],
-    flags = [
-        "ccflags-y += -Werror",
-        "ccflags-y += -Wno-error=deprecated-declarations",
-    ],
-    module_name = "hello_x86_64",
-    output_file = "x86_64/Makefile",
+    module_name = "hello",
+    output_file = "Makefile",
     strip_include_paths = [
         "drivers",
     ],
@@ -51,21 +32,11 @@ makefile(
 )
 
 kernel_module(
-    name = "hello_aarch64",
+    name = "hello",
     srcs = [
         "src/hello.c",
         ":include/drivers/hello.h",
     ],
-    kernel_build = "@linux//:kernel_aarch64",
-    makefile = ":aarch64/Makefile",
-)
-
-kernel_module(
-    name = "hello_x86_64",
-    srcs = [
-        "src/hello.c",
-        ":include/drivers/hello.h",
-    ],
-    kernel_build = "@linux//:kernel_x86_64",
-    makefile = ":x86_64/Makefile",
+    kernel_build = "@linux//:kernel",
+    makefile = ":Makefile",
 )
