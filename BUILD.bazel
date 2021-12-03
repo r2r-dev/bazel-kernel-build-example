@@ -1,0 +1,10 @@
+load("//lib:defs.bzl", "rules")
+
+rules.derive(
+    name = "split_hello",
+    targets = ["//oot:hello"],
+    platforms = [ 
+        "//platforms:x86_64-linux",
+        "//platforms:aarch64-linux",
+    ],
+)

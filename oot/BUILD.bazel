@@ -39,4 +39,5 @@ kernel_module(
     ],
     kernel_build = "@linux//:kernel",
     makefile = ":Makefile",
+    visibility = ["//visibility:public"],
 )
